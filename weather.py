@@ -14,7 +14,7 @@ from Adafruit_CharLCD import Adafruit_CharLCD
 # Settings
 #========================================
 home_dir = "/home/pi/weather/"
-www_dir = "/var/www/weather/"
+www_dir = "/var/www/html/"
 delete_data_older_than_days = 30
 temperature_unit = 'C' # 'C' | 'F'
 pressure_unit = 'mm Hg' # 'Pa' | 'mm Hg'
@@ -114,7 +114,7 @@ txt = re.sub('{pressure7d}', get_chart_data(pressure_field, 7), txt)
 txt = re.sub('{humidity7d}', get_chart_data(humidity_field, 7), txt)
 
 #Writing file index.htm
-f = open(www_dir+'index.htm','w')
+f = open(www_dir+'index.html','w')
 f.write(txt)
 f.close()
 
