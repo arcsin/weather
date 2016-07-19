@@ -49,9 +49,11 @@ def get_chart_data(field, days):
 	return result
 
 #Read data from Sensor
-ps = BME280()
-ps_data = ps.get_data()
+#ps = BME280()
+#ps_data = ps.get_data()
+ps_data = ['t':25,'p':1000,'h':67];
 print "Temperature:", convert(ps_data['t'], units[temperature_field]), "°"+units[temperature_field], "Pressure:", convert(ps_data['p'], units[pressure_field]), units[pressure_field], "Humidity:", ps_data['h'], units[humidity_field]
+
 
 #LCD
 lcd = Adafruit_CharLCD()
