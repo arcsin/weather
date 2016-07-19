@@ -7,6 +7,7 @@ import time
 import datetime
 import re
 import os
+import pyowm
 #from BME280 import *
 from Adafruit_CharLCD import Adafruit_CharLCD
 
@@ -51,7 +52,23 @@ def get_chart_data(field, days):
 #Read data from Sensor
 #ps = BME280()
 #ps_data = ps.get_data()
-ps_data = {'t': 25,'p': 1000,'h': 67};
+
+
+f = open(home_dir+'appid','r')
+owm_appid = f.read()
+owm_appid = owm_appid.rstrip('\n')
+f.close()
+#print owm_appid
+
+owm = pyowm.OWM(owm_appid) 
+
+observation = owm.weather_at_place("Kramatorsk")
+w = observation.get_weather()
+temperature=w.get_temperature('celsius')['temp']
+humidity=w.get_humidity()
+pressure=w.get_pressure()['press']*100;
+
+ps_data = {'t': temperature,'p': pressure,'h': humidity};
 print "Temperature:", convert(ps_data['t'], units[temperature_field]), "°"+units[temperature_field], "Pressure:", convert(ps_data['p'], units[pressure_field]), units[pressure_field], "Humidity:", ps_data['h'], units[humidity_field]
 
 
