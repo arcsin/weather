@@ -7,7 +7,7 @@ import time
 import datetime
 import re
 import os
-from BME280 import *
+#from BME280 import *
 from Adafruit_CharLCD import Adafruit_CharLCD
 
 #========================================
@@ -51,7 +51,7 @@ def get_chart_data(field, days):
 #Read data from Sensor
 #ps = BME280()
 #ps_data = ps.get_data()
-ps_data = ['t':25,'p':1000,'h':67];
+ps_data = {'t': 25,'p': 1000,'h': 67};
 print "Temperature:", convert(ps_data['t'], units[temperature_field]), "°"+units[temperature_field], "Pressure:", convert(ps_data['p'], units[pressure_field]), units[pressure_field], "Humidity:", ps_data['h'], units[humidity_field]
 
 
