@@ -8,6 +8,7 @@ import datetime
 import re
 import os
 import pyowm
+import math
 #from BME280 import *
 from Adafruit_CharLCD import Adafruit_CharLCD
 
@@ -36,6 +37,15 @@ def convert(value, unit):
 		 #Convert from Pa to mm Hg
 		return round(value * 0.00750061683, 2)
 	return value
+
+def calc_dew_point1(T, RH):
+	a = 6.112 # millibar
+	b = 17.67 # 
+	c = 243.14 # *Celsius
+	print "T=",T,"RH=",RH
+	print "log(",RH/100.0,")=",math.log(RH/100.0)
+	return c*(math.log(RH/100.0)+b*T/(c+T))/(b-math.log(RH/100.0)+b*T/(c+T));
+
 
 def get_chart_data(field, days):
 	global units
@@ -71,6 +81,10 @@ pressure=w.get_pressure()['press']*100;
 ps_data = {'t': temperature,'p': pressure,'h': humidity};
 print "Temperature:", convert(ps_data['t'], units[temperature_field]), "°"+units[temperature_field], "Pressure:", convert(ps_data['p'], units[pressure_field]), units[pressure_field], "Humidity:", ps_data['h'], units[humidity_field]
 
+#dew point
+
+dew_point = calc_dew_point1(temperature,humidity) 
+print "Dev point = ",dew_point
 
 #LCD
 lcd = Adafruit_CharLCD()
