@@ -23,6 +23,7 @@
 <div id="chart_divTemperature24h" width="400"></div>
 <div id="chart_divPressure24h" width="400"></div>
 <div id="chart_divHumidity24h" width="400"></div>
+<div id="chart_divDewPoint24h" width="400"></div>
 
 
 <h1>Last week</h1>
@@ -123,6 +124,37 @@ function drawHumidity24() {
       chartH.draw(data, options);
     }
 
+
+function drawDewPoint24() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('datetime', 'X');
+      data.addColumn('number', 'Dew Point, °{temperature_unit}');
+
+      data.addRows([
+{dew_point24h}
+      ]);
+
+      var options = {
+        title: 'DPTemperature. Last 24h',
+        hAxis: {
+          //format: 'dd.MM.yyyy hh:mm',
+          format: 'hh:mm',
+          //title: 'Time',
+          logScale: false
+        },
+        vAxis: {
+          title: 'DPTemperature, °{temperature_unit}',
+          logScale: false
+        },
+        colors: ['#F40000', '#F40000'],
+        height: 450
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_divDewPoint24h'));
+      chart.draw(data, options);
+    }
+
+
 //------------------------------------------------------------------------------
 
 function drawTemperature7d() {
@@ -217,6 +249,8 @@ function drawHumidity7d() {
   google.charts.setOnLoadCallback(drawTemperature24);
   google.charts.setOnLoadCallback(drawPressure24);
   google.charts.setOnLoadCallback(drawHumidity24);
+  google.charts.setOnLoadCallback(drawDewPoint24);
+
 
   google.charts.setOnLoadCallback(drawTemperature7d);
   google.charts.setOnLoadCallback(drawPressure7d);
