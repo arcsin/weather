@@ -40,11 +40,13 @@ def convert(value, unit):
 
 def calc_dew_point1(T, RH):
 	a = 6.112 # millibar
-	b = 17.67 # 
-	c = 243.14 # *Celsius
-	print "T=",T,"RH=",RH
-	print "log(",RH/100.0,")=",math.log(RH/100.0)
-	return c*(math.log(RH/100.0)+b*T/(c+T))/(b-math.log(RH/100.0)+b*T/(c+T));
+	b = 18.729 # 
+	c = 257.87 # *Celsius
+	d = 227.3  # *Celsius
+	#print "T=",T,"RH=",RH
+	#print "log(",RH/100.0,")=",math.log(RH/100.0)
+	gamma = math.log(RH/100.0*math.exp((b-T/d)*T/(T+c)))	
+	return c*gamma/(b-gamma)
 
 
 def get_chart_data(field, days):
@@ -105,7 +107,7 @@ con = sqlite3.connect(home_dir + database_name)
 cur = con.cursor()
 
 #Insert new reccord
-SQL="INSERT INTO weather VALUES({0}, '{1}', {2}, {3})".format(time.time(), ps_data['t'], ps_data['p'], ps_data['h'])
+SQL="INSERT INTO weather VALUES({0}, '{1}', {2}, {3} ,{4})".format(time.time(), ps_data['t'], ps_data['p'], ps_data['h'], dew_point)
 cur.execute(SQL)
 con.commit()
 
@@ -133,6 +135,7 @@ txt = re.sub('{time}', date_time, txt)
 txt = re.sub('{temperature}', str(convert(ps_data['t'], units[temperature_field])), txt)
 txt = re.sub('{pressure}', str(convert(ps_data['p'], units[pressure_field])), txt)
 txt = re.sub('{humidity}', str(ps_data['h']), txt)
+txt = re.sub('{dew_point}', str(convert(dew_point,units[temperature_field])), txt)
 
 #Day ago
 txt = re.sub('{temperature24h}', get_chart_data(temperature_field, 1), txt)

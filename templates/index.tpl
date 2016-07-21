@@ -14,6 +14,8 @@
 <div>Temperature: {temperature} °{temperature_unit}</div>
 <div>Pressure: {pressure} {pressure_unit}</div>
 <div>Humidity: {humidity} %</div>
+<div>Dew point: {dew_point} °{temperature_unit}</div>
+
 
 
 <h1>Last 24 hours</h1>
