@@ -135,7 +135,7 @@ function drawDewPoint24() {
       ]);
 
       var options = {
-        title: 'DPTemperature. Last 24h',
+        title: 'Dew Point. Last 24h',
         hAxis: {
           //format: 'dd.MM.yyyy hh:mm',
           format: 'hh:mm',
@@ -143,7 +143,7 @@ function drawDewPoint24() {
           logScale: false
         },
         vAxis: {
-          title: 'DPTemperature, °{temperature_unit}',
+          title: 'Dew Point, °{temperature_unit}',
           logScale: false
         },
         colors: ['#F40000', '#F40000'],

@@ -142,7 +142,7 @@ txt = re.sub('{dew_point}', str(convert(dew_point,units[temperature_field])), tx
 txt = re.sub('{temperature24h}', get_chart_data(temperature_field, 1), txt)
 txt = re.sub('{pressure24h}', get_chart_data(pressure_field, 1), txt)
 txt = re.sub('{humidity24h}', get_chart_data(humidity_field, 1), txt)
-txt = re.sub('{dew_point24h}', get_chart_data(temperature_field, 1), txt)
+txt = re.sub('{dew_point24h}', get_chart_data(dew_point_field, 1), txt)
 
 #Last week
 txt = re.sub('{temperature7d}', get_chart_data(temperature_field, 7), txt)
