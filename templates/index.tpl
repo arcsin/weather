@@ -41,10 +41,11 @@ function drawTemperature24() {
       var data = new google.visualization.DataTable();
       data.addColumn('datetime', 'X');
       data.addColumn('number', 'Temperature, °{temperature_unit}');
-
-      data.addRows([
-{temperature24h}
-      ]);
+      data.addColumn('number', 'Dew Point, °{temperature_unit}');
+            
+data.addRows([
+{temperature24h}]);
+      
 
       var options = {
         title: 'Temperature. Last 24h',
@@ -58,7 +59,7 @@ function drawTemperature24() {
           title: 'Temperature, °{temperature_unit}',
           logScale: false
         },
-        colors: ['#F40000', '#F40000'],
+        
         height: 450
       };
 

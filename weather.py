@@ -62,6 +62,22 @@ def get_chart_data(field, days):
 	result = re.sub(r', $', '', result)
 	return result
 
+def get_chart_data_temperature(days):
+	global units
+	result = ""
+	start_time =  time.time() - 86400*days
+	SQL = "SELECT id, {0}, {1} FROM weather WHERE (id > {2}) ORDER BY id DESC".format(temperature_field, dew_point_field, start_time)
+	cur.execute(SQL)
+	for row in cur:
+		temperature = convert(row[1], temperature_unit)
+		dew_point = convert(row[2], temperature_unit)
+	
+		result += "[new Date({0}), {1}, {2}], ".format(int(row[0]*1000), temperature, dew_point)
+	result = re.sub(r', $', '', result)
+	return result
+
+
+
 #Read data from Sensor
 #ps = BME280()
 #ps_data = ps.get_data()
@@ -139,7 +155,7 @@ txt = re.sub('{humidity}', str(ps_data['h']), txt)
 txt = re.sub('{dew_point}', str(convert(dew_point,units[temperature_field])), txt)
 
 #Day ago
-txt = re.sub('{temperature24h}', get_chart_data(temperature_field, 1), txt)
+txt = re.sub('{temperature24h}', get_chart_data_temperature(1), txt)
 txt = re.sub('{pressure24h}', get_chart_data(pressure_field, 1), txt)
 txt = re.sub('{humidity24h}', get_chart_data(humidity_field, 1), txt)
 txt = re.sub('{dew_point24h}', get_chart_data(dew_point_field, 1), txt)
