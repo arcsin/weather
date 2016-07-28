@@ -123,6 +123,22 @@ lcd.message('H=%s%%' % (ps_data['h']))
 con = sqlite3.connect(home_dir + database_name)
 cur = con.cursor()
 
+#Cheak actual time
+
+SQL="SELECT MAX(id) FROM weather"
+cur.execute(SQL)
+last = cur.fetchone()[0]
+now = time.time()
+print "Last time: "+str(last)
+print "Time now:  "+str(now)
+
+if now>last:
+	con.close
+	f=open('log','a') #a=append
+	f.write("ERROR: Time not sync")
+	f.close 
+	
+
 #Insert new reccord
 SQL="INSERT INTO weather VALUES({0}, '{1}', {2}, {3} ,{4})".format(time.time(), ps_data['t'], ps_data['p'], ps_data['h'], dew_point)
 cur.execute(SQL)
