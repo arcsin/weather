@@ -7,6 +7,7 @@ import time
 import datetime
 import re
 import os
+import sys
 import pyowm
 import math
 #from BME280 import *
@@ -132,11 +133,12 @@ now = time.time()
 print "Last time: "+str(last)
 print "Time now:  "+str(now)
 
-if now>last:
+if now<last:
 	con.close
 	f=open('log','a') #a=append
-	f.write("ERROR: Time not sync")
-	f.close 
+	f.write("ERROR: Time not sync\n")
+	f.close
+	sys.exit() 
 	
 
 #Insert new reccord
@@ -177,7 +179,7 @@ txt = re.sub('{humidity24h}', get_chart_data(humidity_field, 1), txt)
 txt = re.sub('{dew_point24h}', get_chart_data(dew_point_field, 1), txt)
 
 #Last week
-txt = re.sub('{temperature7d}', get_chart_data(temperature_field, 7), txt)
+txt = re.sub('{temperature7d}', get_chart_data_temperature(7), txt)
 txt = re.sub('{pressure7d}', get_chart_data(pressure_field, 7), txt)
 txt = re.sub('{humidity7d}', get_chart_data(humidity_field, 7), txt)
 
