@@ -23,6 +23,9 @@ temperature_unit = 'C' # 'C' | 'F'
 pressure_unit = 'mm Hg' # 'Pa' | 'mm Hg'
 humidity_unit = '%'
 #========================================
+sea_level = 110 # meters
+
+#========================================
 database_name = 'weather.db'
 temperature_field = 'temperature'
 pressure_field = 'pressure'
@@ -40,7 +43,7 @@ def convert(value, unit):
 		return round(value * 0.00750061683, 2)
 	return value
 
-def calc_dew_point1(T, RH):
+def calc_dew_point(T, RH):
 	a = 6.112 # millibar
 	b = 18.729 # 
 	c = 257.87 # *Celsius
@@ -49,6 +52,15 @@ def calc_dew_point1(T, RH):
 	#print "log(",RH/100.0,")=",math.log(RH/100.0)
 	gamma = math.log(RH/100.0*math.exp((b-T/d)*T/(T+c)))	
 	return c*gamma/(b-gamma)
+
+def calc_pressure_sea_level(P1, T):
+	M = 0.029 # 
+	g = 9.81 # 
+	R = 8.31 # 
+	#d = 227.3  # *Celsius
+	P0 = P1/math.exp(-M*g*sea_level/(R*(273+T)))
+	#print "P1 = ",P1,"P0 = ",P0 ,"hPa"
+	return P0
 
 
 def get_chart_data(field, days):
@@ -103,8 +115,15 @@ print "Temperature:", convert(ps_data['t'], units[temperature_field]), "°"+unit
 
 #dew point
 
-dew_point = calc_dew_point1(temperature,humidity) 
+dew_point = calc_dew_point(temperature,humidity) 
 print "Dev point = ",dew_point
+
+#Pressure on sea level
+
+Pressure_on_sea_level = calc_pressure_sea_level(pressure,temperature) 
+print "Pressure_on_sea_level = ", Pressure_on_sea_level
+
+
 
 #LCD
 lcd = Adafruit_CharLCD()
@@ -168,7 +187,8 @@ txt = re.sub('{humidity_unit}', units[humidity_field], txt)
 #Current data
 txt = re.sub('{time}', date_time, txt)
 txt = re.sub('{temperature}', str(convert(ps_data['t'], units[temperature_field])), txt)
-txt = re.sub('{pressure}', str(convert(ps_data['p'], units[pressure_field])), txt)
+txt = re.sub('{pressure}', 'P1 = '+str(convert(ps_data['p'], units[pressure_field]))+' P0 = '+
+                           str(convert(Pressure_on_sea_level, units[pressure_field])), txt)
 txt = re.sub('{humidity}', str(ps_data['h']), txt)
 txt = re.sub('{dew_point}', str(convert(dew_point,units[temperature_field])), txt)
 
