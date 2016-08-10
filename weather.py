@@ -56,6 +56,7 @@ units = {owm_temperature_field: temperature_unit,
 	
 }
 
+
 def convert(value, unit):
 	if unit == 'F':
 		# Convert from Celsius to Fahrenheit
@@ -101,7 +102,7 @@ def get_chart_data_temperature(days):
 	global units
 	result = ""
 	start_time =  time.time() - 86400*days
-	SQL = "SELECT id, {0}, {1} FROM weather WHERE (id > {2}) ORDER BY id DESC".format(temperature_field, dew_point_field, start_time)
+	SQL = "SELECT id, {0}, {1} FROM weather WHERE (id > {2}) ORDER BY id DESC".format(real1_temperature_field, real1_dewpoint_field, start_time)
 	cur.execute(SQL)
 	for row in cur:
 		temperature = convert(row[1], temperature_unit)
@@ -160,7 +161,7 @@ print "Humidity:", owm_humidity, units[owm_humidity_field]
 
 print "dewpoint = ",owm_dewpoint 
 print "pressure_on_sea_level = ", owm_pressureOSL
-
+print "Clouds = ",owm_clouds,"%"
 
 
 #LCD
@@ -230,28 +231,28 @@ f.close()
 date_time = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M')
 
 #Units
-txt = re.sub('{temperature_unit}', units[temperature_field], txt)
-txt = re.sub('{pressure_unit}', units[pressure_field], txt)
-txt = re.sub('{humidity_unit}', units[humidity_field], txt)
+txt = re.sub('{temperature_unit}', units[real1_temperature_field], txt)
+txt = re.sub('{pressure_unit}', units[real1_pressure_field], txt)
+txt = re.sub('{humidity_unit}', units[real1_humidity_field], txt)
 
 #Current data
 txt = re.sub('{time}', date_time, txt)
-txt = re.sub('{temperature}', str(convert(ps_data['t'], units[temperature_field])), txt)
-txt = re.sub('{pressure}', 'P1 = '+str(convert(ps_data['p'], units[pressure_field]))+' P0 = '+
-                           str(convert(Pressure_on_sea_level, units[pressure_field])), txt)
-txt = re.sub('{humidity}', str(ps_data['h']), txt)
-txt = re.sub('{dew_point}', str(convert(dew_point,units[temperature_field])), txt)
+txt = re.sub('{temperature}', str(convert(real1_temperature, units[real1_temperature_field])), txt)
+txt = re.sub('{pressure}', 'P1 = '+str(convert(real1_pressure, units[real1_pressure_field]))+' P0 = '+
+                           str(convert(real1_pressureOSL, units[real1_pressure_field])), txt)
+txt = re.sub('{humidity}', str(real1_humidity), txt)
+txt = re.sub('{dew_point}', str(convert(real1_dewpoint,units[real1_temperature_field])), txt)
 
 #Day ago
 txt = re.sub('{temperature24h}', get_chart_data_temperature(1), txt)
-txt = re.sub('{pressure24h}', get_chart_data(pressure_field, 1), txt)
-txt = re.sub('{humidity24h}', get_chart_data(humidity_field, 1), txt)
-txt = re.sub('{dew_point24h}', get_chart_data(dew_point_field, 1), txt)
+txt = re.sub('{pressure24h}', get_chart_data(real1_pressure_field, 1), txt)
+txt = re.sub('{humidity24h}', get_chart_data(real1_humidity_field, 1), txt)
+txt = re.sub('{dew_point24h}', get_chart_data(real1_dewpoint_field, 1), txt)
 
 #Last week
-txt = re.sub('{temperature7d}', get_chart_data_temperature(7), txt)
-txt = re.sub('{pressure7d}', get_chart_data(pressure_field, 7), txt)
-txt = re.sub('{humidity7d}', get_chart_data(humidity_field, 7), txt)
+txt = re.sub('{temperature7d}', get_chart_data_temperature(1), txt)
+txt = re.sub('{pressure7d}', get_chart_data(real1_pressure_field, 1), txt)
+txt = re.sub('{humidity7d}', get_chart_data(real1_humidity_field, 1), txt)
 
 #Writing file index.htm
 f = open(www_dir+'index.html','w')
