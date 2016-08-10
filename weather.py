@@ -10,7 +10,7 @@ import os
 import sys
 import pyowm
 import math
-#from BME280 import *
+from BME280 import *
 from Adafruit_CharLCD import Adafruit_CharLCD
 
 #========================================
@@ -22,17 +22,39 @@ delete_data_older_than_days = 30
 temperature_unit = 'C' # 'C' | 'F'
 pressure_unit = 'mm Hg' # 'Pa' | 'mm Hg'
 humidity_unit = '%'
+clouds_unit = '%'
+
 #========================================
 sea_level = 110 # meters
 
 #========================================
 database_name = 'weather.db'
-temperature_field = 'temperature'
-pressure_field = 'pressure'
-humidity_field = 'humidity'
-dew_point_field = 'dew_point'
+owm_temperature_field = 'owm_temperature'
+owm_pressure_field =    'owm_pressure'
+owm_pressureOSL_field = 'owm_pressureOSL'
+owm_humidity_field = 'owm_humidity'
+owm_dewpoint_field = 'owm_dewpoint'
+owm_clouds_field = 'owm_clouds'
+real1_temperature_field = 'real1_temperature'
+real1_pressure_field =    'real1_pressure'
+real1_pressureOSL_field = 'real1_pressureOSL'
+real1_humidity_field = 'real1_humidity'
+real1_dewpoint_field = 'real1_dewpoint'
 
-units = {temperature_field: temperature_unit, pressure_field: pressure_unit, humidity_field: humidity_unit, dew_point_field: temperature_unit}
+units = {owm_temperature_field: temperature_unit,
+ 	owm_pressure_field: pressure_unit,
+ 	owm_pressureOSL_field: pressure_unit,
+	owm_humidity_field: humidity_unit,
+ 	owm_dewpoint_field: temperature_unit,
+	owm_clouds_field: clouds_unit,
+	
+	real1_temperature_field: temperature_unit,
+ 	real1_pressure_field: pressure_unit,
+ 	real1_pressureOSL_field: pressure_unit,
+	real1_humidity_field: humidity_unit,
+ 	real1_dewpoint_field: temperature_unit,
+	
+}
 
 def convert(value, unit):
 	if unit == 'F':
@@ -92,8 +114,23 @@ def get_chart_data_temperature(days):
 
 
 #Read data from Sensor
-#ps = BME280()
-#ps_data = ps.get_data()
+ps = BME280()
+ps_data = ps.get_data()
+real1_temperature=ps_data['t']
+real1_pressure=ps_data['p']
+real1_humidity=ps_data['h']
+#dew point
+real1_dewpoint = calc_dew_point(real1_temperature,real1_humidity) 
+#pressure on sea level
+real1_pressureOSL=calc_pressure_sea_level(real1_pressure,real1_temperature)
+
+print "###Real###"
+print "Temperature :", convert(real1_temperature, units[real1_temperature_field])," "+units[real1_temperature_field]
+print "Pressure:", convert(real1_pressure, units[real1_pressure_field]), units[real1_pressure_field]
+print "Humidity:", real1_humidity, units[real1_humidity_field]
+print "dewpoint = ",real1_dewpoint 
+print "pressure_on_sea_level = ", real1_pressureOSL
+
 
 
 f = open(home_dir+'appid','r')
@@ -106,31 +143,32 @@ owm = pyowm.OWM(owm_appid)
 
 observation = owm.weather_at_place("Kramatorsk")
 w = observation.get_weather()
-temperature=w.get_temperature('celsius')['temp']
-humidity=w.get_humidity()
-pressure=w.get_pressure()['press']*100;
-
-ps_data = {'t': temperature,'p': pressure,'h': humidity};
-print "Temperature:", convert(ps_data['t'], units[temperature_field]), "°"+units[temperature_field], "Pressure:", convert(ps_data['p'], units[pressure_field]), units[pressure_field], "Humidity:", ps_data['h'], units[humidity_field]
-
+owm_temperature=w.get_temperature('celsius')['temp']
+owm_humidity=w.get_humidity()
+owm_clouds=w.get_clouds()
+owm_pressure=w.get_pressure()['press']*100;
+owm_pressureOSL=w.get_pressure()['sea_level']*100;
 #dew point
+owm_dewpoint = calc_dew_point(owm_temperature,owm_humidity) 
+#owm_dewpoint = w.get_dewpoint() #dont work
 
-dew_point = calc_dew_point(temperature,humidity) 
-print "Dev point = ",dew_point
 
-#Pressure on sea level
+print "###OWM###"
+print "Temperature:", convert(owm_temperature, units[owm_temperature_field]), "�"+units[owm_temperature_field] 
+print "Pressure:", convert(owm_pressure, units[owm_pressure_field]), units[owm_pressure_field] 
+print "Humidity:", owm_humidity, units[owm_humidity_field]
 
-Pressure_on_sea_level = calc_pressure_sea_level(pressure,temperature) 
-print "Pressure_on_sea_level = ", Pressure_on_sea_level
+print "dewpoint = ",owm_dewpoint 
+print "pressure_on_sea_level = ", owm_pressureOSL
 
 
 
 #LCD
-lcd = Adafruit_CharLCD()
-lcd.clear()
-lcd.home()
-lcd.message('T=%s  P=%s\n' % (convert(ps_data['t'], units[temperature_field]), convert(ps_data['p'], units[pressure_field])))
-lcd.message('H=%s%%' % (ps_data['h']))
+#lcd = Adafruit_CharLCD()
+#lcd.clear()
+#lcd.home()
+#lcd.message('T=%s  P=%s\n' % (convert(ps_data['t'], units[temperature_field]), convert(ps_data['p'], units[pressure_field])))
+#lcd.message('H=%s%%' % (ps_data['h']))
 
 # ESPEAK
 #speak_str = "Тем пе ратура "
@@ -161,7 +199,19 @@ if now<last:
 	
 
 #Insert new reccord
-SQL="INSERT INTO weather VALUES({0}, '{1}', {2}, {3} ,{4})".format(time.time(), ps_data['t'], ps_data['p'], ps_data['h'], dew_point)
+SQL="INSERT INTO weather VALUES({0}, {1}, {2}, {3} ,{4}, {5}, {6}, {7}, {8} ,{9}, {10}, {11})".format(
+time.time(),
+owm_temperature,
+owm_pressure,
+owm_pressureOSL,
+owm_humidity,
+owm_dewpoint,
+owm_clouds,
+real1_temperature,
+real1_humidity,
+real1_pressure,
+real1_pressureOSL,
+real1_dewpoint)
 cur.execute(SQL)
 con.commit()
 
