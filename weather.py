@@ -10,8 +10,10 @@ import os
 import sys
 import pyowm
 import math
+import requests
 from BME280 import *
 from Adafruit_CharLCD import Adafruit_CharLCD
+
 
 #========================================
 # Settings
@@ -112,6 +114,59 @@ def get_chart_data_temperature(days):
 	result = re.sub(r', $', '', result)
 	return result
 
+def upload_to_openweathermap():
+	# OpenWeatherMap
+	URL_OPENW = 'http://openweathermap.org/data/post'
+	ALTITUDE = sea_level
+	f = open(home_dir+'owm_settings','r')
+	LATITUDE = f.readline()
+	LONGITUDE = f.readline()
+	USER_NAME = f.readline().rstrip('\n')
+	PASSW = f.readline().rstrip('\n')
+	STATION_NAME = f.readline().rstrip('\n')
+	#print	LATITUDE
+	#print PASSW
+	f.close()
+	
+
+	# OpenWeatherMap
+	
+	f = open(home_dir+'appid','r')
+	owm_appid = f.read().rstrip('\n')
+	f.close()
+
+    
+	data_post = {
+	'APPID': owm_appid,
+        'temp': real1_temperature,
+        'humidity': real1_humidity,
+	'pressure': real1_pressure/100,
+	'dewpoint': real1_dewpoint,
+        'lat': LATITUDE,
+        'long': LONGITUDE,
+        'alt': ALTITUDE,
+        'name': STATION_NAME
+    	}
+    	#try:
+        req = requests.post(
+            	URL_OPENW,
+            	auth=(USER_NAME, PASSW),
+            	data=data_post,
+            	timeout=60
+        	)
+    	#except (ConnectionError, HTTPError, URLRequired, Timeout) as e:
+        #	log.error(str(e))
+    	#else:
+       	if (req.status_code == requests.codes['ok']):
+        	print "Sending done"    		
+	#		log.info('Upload to OpenWeather success.')
+        else:
+		print "Sending failed " +  str(req.status_code)       
+	#    		log.error(
+        #        	'Upload to OpenWeather failed with code '
+        #        	+
+        #        	str(req.status_code)
+	#		)
 
 
 #Read data from Sensor
@@ -132,23 +187,31 @@ print "Humidity:", real1_humidity, units[real1_humidity_field]
 print "dewpoint = ",real1_dewpoint 
 print "pressure_on_sea_level = ", real1_pressureOSL
 
+#uploading data to OWM
+print "###Sending data to OWM"
+upload_to_openweathermap()
 
+#waiting before reading
+time.sleep(10) 
 
 f = open(home_dir+'appid','r')
-owm_appid = f.read()
-owm_appid = owm_appid.rstrip('\n')
+owm_appid = f.read().rstrip('\n')
 f.close()
 #print owm_appid
 
 owm = pyowm.OWM(owm_appid) 
 
-observation = owm.weather_at_place("Kramatorsk")
+observation = owm.weather_at_place("Kramatorsk,ua")
 w = observation.get_weather()
 owm_temperature=w.get_temperature('celsius')['temp']
 owm_humidity=w.get_humidity()
 owm_clouds=w.get_clouds()
-owm_pressure=w.get_pressure()['press']*100;
-owm_pressureOSL=w.get_pressure()['sea_level']*100;
+print w.get_pressure()
+owm_pressure=w.get_pressure()['press']*100
+if w.get_pressure()['sea_level'] is not None:
+	owm_pressureOSL=w.get_pressure()['sea_level']*100
+else:
+	owm_pressureOSL=0
 #dew point
 owm_dewpoint = calc_dew_point(owm_temperature,owm_humidity) 
 #owm_dewpoint = w.get_dewpoint() #dont work
@@ -250,9 +313,9 @@ txt = re.sub('{humidity24h}', get_chart_data(real1_humidity_field, 1), txt)
 txt = re.sub('{dew_point24h}', get_chart_data(real1_dewpoint_field, 1), txt)
 
 #Last week
-txt = re.sub('{temperature7d}', get_chart_data_temperature(1), txt)
-txt = re.sub('{pressure7d}', get_chart_data(real1_pressure_field, 1), txt)
-txt = re.sub('{humidity7d}', get_chart_data(real1_humidity_field, 1), txt)
+txt = re.sub('{temperature7d}', get_chart_data_temperature(2), txt)
+txt = re.sub('{pressure7d}', get_chart_data(real1_pressure_field, 2), txt)
+txt = re.sub('{humidity7d}', get_chart_data(real1_humidity_field, 2), txt)
 
 #Writing file index.htm
 f = open(www_dir+'index.html','w')
