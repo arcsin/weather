@@ -179,7 +179,7 @@ def upload_to_narodmon():
 		
 	# идентификатор устройства, для простоты добавляется 01 (02) к mac устройства
 	SENSOR_ID_1 = DEVICE_MAC + '-T1'
-	SENSOR_ID_2 = DEVICE_MAC + '-T2'
+	SENSOR_ID_2 = DEVICE_MAC + '-DP'
 	SENSOR_ID_3 = DEVICE_MAC + '-H1'
 	SENSOR_ID_4 = DEVICE_MAC + '-P0'
 
