@@ -3,6 +3,8 @@
 
 import sqlite3
 import urllib2
+import urllib
+
 import time
 import datetime
 import re
@@ -76,7 +78,8 @@ def calc_dew_point(T, RH):
 	#print "T=",T,"RH=",RH
 	#print "log(",RH/100.0,")=",math.log(RH/100.0)
 	gamma = math.log(RH/100.0*math.exp((b-T/d)*T/(T+c)))	
-	return c*gamma/(b-gamma)
+	dew_point = c*gamma/(b-gamma)
+	return round(dew_point,2)
 
 def calc_pressure_sea_level(P1, T):
 	M = 0.029 # 
@@ -168,6 +171,48 @@ def upload_to_openweathermap():
         #        	str(req.status_code)
 	#		)
 
+def upload_to_narodmon():
+	# MAC адрес устройства. 
+	f = open(home_dir+'narodmon_settings','r')
+	DEVICE_MAC = f.readline().rstrip('\n')
+	f.close()
+		
+	# идентификатор устройства, для простоты добавляется 01 (02) к mac устройства
+	SENSOR_ID_1 = DEVICE_MAC + '-T1'
+	SENSOR_ID_2 = DEVICE_MAC + '-T2'
+	SENSOR_ID_3 = DEVICE_MAC + '-H1'
+	SENSOR_ID_4 = DEVICE_MAC + '-P0'
+
+
+
+# формирование POST запроса для единичного датчика
+#data = urllib.urlencode({
+#    'ID': DEVICE_MAC,
+#    SENSOR_ID_1: sensor_value_1
+#})
+
+# формирование POST запроса для 2х датчиков
+	data = urllib.urlencode({
+     	'ID': DEVICE_MAC,
+     	SENSOR_ID_1: real1_temperature,
+     	SENSOR_ID_2: real1_dewpoint,
+	SENSOR_ID_3: real1_humidity,
+	SENSOR_ID_4: convert(real1_pressureOSL,'mm Hg')
+ 	})	
+
+
+# формирование заголовков запроса
+	headers = {
+    	'Content-Length': str(len(data)),
+    	'Content-Type': 'application/x-www-form-urlencoded',
+    	'Host': 'narodmon.ru'
+	}
+
+# непосредственно запрос
+	request = urllib2.Request('http://narodmon.ru/post.php', data, headers)
+	response = urllib2.urlopen(request)
+	print response.headers
+
 
 #Read data from Sensor
 ps = BME280()
@@ -190,6 +235,11 @@ print "pressure_on_sea_level = ", real1_pressureOSL
 #uploading data to OWM
 print "###Sending data to OWM"
 upload_to_openweathermap()
+
+#uploading data to narodmon
+print "###Sending data to narodmon"
+upload_to_narodmon()
+
 
 #waiting before reading
 time.sleep(10) 
@@ -218,7 +268,7 @@ owm_dewpoint = calc_dew_point(owm_temperature,owm_humidity)
 
 
 print "###OWM###"
-print "Temperature:", convert(owm_temperature, units[owm_temperature_field]), "�"+units[owm_temperature_field] 
+print "Temperature:", convert(owm_temperature, units[owm_temperature_field]), "°"+units[owm_temperature_field] 
 print "Pressure:", convert(owm_pressure, units[owm_pressure_field]), units[owm_pressure_field] 
 print "Humidity:", owm_humidity, units[owm_humidity_field]
 
@@ -235,9 +285,9 @@ print "Clouds = ",owm_clouds,"%"
 #lcd.message('H=%s%%' % (ps_data['h']))
 
 # ESPEAK
-#speak_str = "Тем пе ратура "
+#speak_str = "Ð¢ÐµÐŒ Ð¿Ðµ ÑÐ°ÑÑÑÐ° "
 #if ps_data['t'] < 0:
-#	speak_str += "минус"
+#	speak_str += "ÐŒÐžÐœÑÑ"
 #speak_str += str(int(round(abs(ps_data['t']))))
 #os.system('espeak "' + speak_str + '" -vru -s50 -a100 2> /dev/null')
 
@@ -313,9 +363,9 @@ txt = re.sub('{humidity24h}', get_chart_data(real1_humidity_field, 1), txt)
 txt = re.sub('{dew_point24h}', get_chart_data(real1_dewpoint_field, 1), txt)
 
 #Last week
-txt = re.sub('{temperature7d}', get_chart_data_temperature(2), txt)
-txt = re.sub('{pressure7d}', get_chart_data(real1_pressure_field, 2), txt)
-txt = re.sub('{humidity7d}', get_chart_data(real1_humidity_field, 2), txt)
+txt = re.sub('{temperature7d}', get_chart_data_temperature(7), txt)
+txt = re.sub('{pressure7d}', get_chart_data(real1_pressure_field, 7), txt)
+txt = re.sub('{humidity7d}', get_chart_data(real1_humidity_field, 7), txt)
 
 #Writing file index.htm
 f = open(www_dir+'index.html','w')
@@ -326,5 +376,5 @@ f.close()
 con.close()
 
 #Send data to my site
-s="{0}:{1}:0:{2}:".format(int(ps_data['p']), int(ps_data['t']), int(ps_data['h']))
-response = urllib2.urlopen("http://avispro.com.ua/getdata.php?data="+s)
+#s="{0}:{1}:0:{2}:".format(int(ps_data['p']), int(ps_data['t']), int(ps_data['h']))
+#response = urllib2.urlopen("http://avispro.com.ua/getdata.php?data="+s)
