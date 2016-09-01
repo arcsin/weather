@@ -250,18 +250,24 @@ f.close()
 #print owm_appid
 
 owm = pyowm.OWM(owm_appid) 
-
-observation = owm.weather_at_place("Kramatorsk,ua")
-w = observation.get_weather()
-owm_temperature=w.get_temperature('celsius')['temp']
-owm_humidity=w.get_humidity()
-owm_clouds=w.get_clouds()
-print w.get_pressure()
-owm_pressure=w.get_pressure()['press']*100
-if w.get_pressure()['sea_level'] is not None:
-	owm_pressureOSL=w.get_pressure()['sea_level']*100
+if owm.is_API_online():
+	observation = owm.weather_at_place("Kramatorsk,ua")
+	w = observation.get_weather()
+	owm_temperature=w.get_temperature('celsius')['temp']
+	owm_humidity=w.get_humidity()
+	owm_clouds=w.get_clouds()
+	print w.get_pressure()
+	owm_pressure=w.get_pressure()['press']*100
+	if w.get_pressure()['sea_level'] is not None:
+		owm_pressureOSL=w.get_pressure()['sea_level']*100
+	else:
+		owm_pressureOSL=None
 else:
-	owm_pressureOSL=0
+	owm_temperature=None
+	owm_humidity=None
+	owm_clouds=None
+	owm_pressure=None
+	owm_pressureOSL=None
 #dew point
 owm_dewpoint = calc_dew_point(owm_temperature,owm_humidity) 
 #owm_dewpoint = w.get_dewpoint() #dont work
