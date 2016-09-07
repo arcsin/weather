@@ -261,13 +261,13 @@ if owm.is_API_online():
 	if w.get_pressure()['sea_level'] is not None:
 		owm_pressureOSL=w.get_pressure()['sea_level']*100
 	else:
-		owm_pressureOSL=None
+		owm_pressureOSL=0
 else:
-	owm_temperature=None
-	owm_humidity=None
-	owm_clouds=None
-	owm_pressure=None
-	owm_pressureOSL=None
+	owm_temperature=0
+	owm_humidity=0
+	owm_clouds=0
+	owm_pressure=0
+	owm_pressureOSL=0
 #dew point
 owm_dewpoint = calc_dew_point(owm_temperature,owm_humidity) 
 #owm_dewpoint = w.get_dewpoint() #dont work

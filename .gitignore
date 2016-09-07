@@ -1,0 +1,7 @@
+weather.db
+appid
+owm_settings
+*.pyc
+log
+test.py
+narodmon_settings
